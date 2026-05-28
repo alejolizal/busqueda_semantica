@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg15
+    container_name: semantic_search_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: semantic_user
+      POSTGRES_PASSWORD: semantic_pass
+      POSTGRES_DB: semantic_search
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U semantic_user -d semantic_search"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
