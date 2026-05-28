@@ -21,6 +21,10 @@ class Settings(BaseSettings):
         alias="DATABASE_URL",
     )
 
+    # Configuración de búsqueda
+    search_threshold: float = Field(0.35, alias="SEARCH_THRESHOLD")
+    search_top_k: int = Field(5, alias="SEARCH_TOP_K")
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

@@ -19,10 +19,16 @@ from src.config import settings
 console = Console()
 
 
-def display_results(results: list, query: str):
+def display_results(results: list, query: str, threshold: float = 0.0):
     """Muestra los resultados de búsqueda en una tabla formateada con Rich."""
     if not results:
-        console.print("[yellow]⚠️  No se encontraron resultados.[/yellow]")
+        if threshold > 0:
+            console.print(
+                f"[yellow]⚠️  Ningún resultado superó el umbral de similitud "
+                f"({threshold:.2f}). Prueba con otra consulta.[/yellow]"
+            )
+        else:
+            console.print("[yellow]⚠️  No se encontraron resultados.[/yellow]")
         return
 
     table = Table(
@@ -52,15 +58,15 @@ def display_results(results: list, query: str):
     console.print(table)
 
 
-def run_search(db: DatabaseManager, client: BaseEmbeddingsClient, query: str, top_k: int = 5):
+def run_search(db: DatabaseManager, client: BaseEmbeddingsClient, query: str, top_k: int = 5, threshold: float = 0.0):
     """Ejecuta una búsqueda semántica y muestra resultados."""
     with console.status("[bold green]Generando embedding de la consulta...[/bold green]"):
         query_embedding = client.get_embedding(query)
 
     with console.status("[bold blue]Buscando en PostgreSQL...[/bold blue]"):
-        results = db.search_similar(query_embedding, top_k=top_k)
+        results = db.search_similar(query_embedding, top_k=top_k, threshold=threshold)
 
-    display_results(results, query)
+    display_results(results, query, threshold=threshold)
     return results
 
 
@@ -71,7 +77,9 @@ def main():
                 f"[bold cyan]🔍 Búsqueda Semántica POC[/bold cyan]\n"
                 f"Proveedor: [yellow]{settings.embedding_provider}[/yellow] | "
                 f"Modelo: [yellow]{settings.embedding_model}[/yellow]\n"
-                f"Base de datos: [yellow]PostgreSQL + pgvector[/yellow]\n\n"
+                f"Base de datos: [yellow]PostgreSQL + pgvector[/yellow] | "
+                f"Umbral: [yellow]{settings.search_threshold}[/yellow] | "
+                f"Top-K: [yellow]{settings.search_top_k}[/yellow]\n\n"
                 f"Escribe tu consulta y presiona [bold]Enter[/bold].\n"
                 f"Escribe [bold red]exit[/bold red] o [bold red]quit[/bold red] para salir."
             ),
@@ -105,7 +113,7 @@ def main():
             break
 
         try:
-            run_search(db, client, query)
+            run_search(db, client, query, top_k=settings.search_top_k, threshold=settings.search_threshold)
         except Exception as e:
             console.print(f"[bold red]❌ Error durante la búsqueda: {e}[/bold red]")
 

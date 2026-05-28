@@ -228,6 +228,8 @@ Todas las variables se cargan desde el archivo `.env`:
 | `EMBEDDING_BASE_URL` | URL base de la API | `https://api.jina.ai/v1` |
 | `EMBEDDING_MODEL` | Modelo de embeddings | `jina-embeddings-v3` |
 | `EMBEDDING_DIMENSION` | Dimensión del vector | `1024` |
+| `SEARCH_THRESHOLD` | Umbral mínimo de similitud (0.0 = desactivado) | `0.35` |
+| `SEARCH_TOP_K` | Máximo de resultados a retornar | `5` |
 | `DATABASE_URL` | URL de conexión a PostgreSQL | `postgresql+psycopg2://semantic_user:semantic_pass@localhost:5432/semantic_search` |
 
 ### Combinaciones válidas
@@ -239,6 +241,19 @@ Todas las variables se cargan desde el archivo `.env`:
 | `local` | `all-MiniLM-L6-v2` | `384` | ❌ | ❌ |
 
 > ⚠️ **Importante**: Si cambias de proveedor o modelo, asegúrate de que `EMBEDDING_DIMENSION` coincida con la dimensión real del modelo. De lo contrario, `init_db.py` fallará con un error de validación.
+
+### Threshold de similitud
+
+El parámetro `SEARCH_THRESHOLD` filtra resultados con score menor al umbral configurado:
+
+- `0.35` (default): Solo muestra documentos con score ≥ 0.35. Elimina resultados poco relevantes.
+- `0.0`: Desactiva el filtro. Muestra los top-k sin importar el score.
+
+Si ningún resultado supera el umbral, verás:
+
+```
+⚠️  Ningún resultado superó el umbral de similitud (0.35). Prueba con otra consulta.
+```
 
 ---
 

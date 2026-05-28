@@ -77,11 +77,12 @@ class DatabaseManager:
             session.close()
 
     def search_similar(
-        self, query_embedding: List[float], top_k: int = 5
+        self, query_embedding: List[float], top_k: int = 5, threshold: float = 0.0
     ) -> List[dict]:
         """Busca los documentos más similares usando similitud coseno.
 
         Retorna lista de dicts con: id, content, metadata, similarity_score.
+        Si threshold > 0, filtra resultados con score menor al umbral.
         """
         session = self.SessionLocal()
         try:
@@ -107,11 +108,14 @@ class DatabaseManager:
             )
             rows = []
             for row in result.mappings():
+                score = float(row["similarity_score"])
+                if threshold > 0 and score < threshold:
+                    continue
                 rows.append({
                     "id": row["id"],
                     "content": row["content"],
                     "metadata": row["metadata"],
-                    "similarity_score": float(row["similarity_score"]),
+                    "similarity_score": score,
                 })
             return rows
         finally:
