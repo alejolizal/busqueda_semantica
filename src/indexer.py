@@ -5,14 +5,14 @@ from rich.console import Console
 from rich.progress import track
 
 from src.database import DatabaseManager
-from src.embeddings import KimiEmbeddingsClient
+from src.embeddings import BaseEmbeddingsClient, get_embeddings_client
 
 console = Console()
 
 BATCH_SIZE = 100
 
 
-def index_csv_file(csv_path: str, db: DatabaseManager, client: KimiEmbeddingsClient):
+def index_csv_file(csv_path: str, db: DatabaseManager, client: BaseEmbeddingsClient):
     """Carga un CSV, genera embeddings y los guarda en PostgreSQL."""
     df = pd.read_csv(csv_path)
 

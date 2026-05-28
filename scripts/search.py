@@ -13,7 +13,7 @@ from rich.text import Text
 from rich import box
 
 from src.database import DatabaseManager
-from src.embeddings import KimiEmbeddingsClient
+from src.embeddings import BaseEmbeddingsClient, get_embeddings_client
 from src.config import settings
 
 console = Console()
@@ -52,7 +52,7 @@ def display_results(results: list, query: str):
     console.print(table)
 
 
-def run_search(db: DatabaseManager, client: KimiEmbeddingsClient, query: str, top_k: int = 5):
+def run_search(db: DatabaseManager, client: BaseEmbeddingsClient, query: str, top_k: int = 5):
     """Ejecuta una búsqueda semántica y muestra resultados."""
     with console.status("[bold green]Generando embedding de la consulta...[/bold green]"):
         query_embedding = client.get_embedding(query)
@@ -69,6 +69,7 @@ def main():
         Panel.fit(
             Text.from_markup(
                 f"[bold cyan]🔍 Búsqueda Semántica POC[/bold cyan]\n"
+                f"Proveedor: [yellow]{settings.embedding_provider}[/yellow] | "
                 f"Modelo: [yellow]{settings.embedding_model}[/yellow]\n"
                 f"Base de datos: [yellow]PostgreSQL + pgvector[/yellow]\n\n"
                 f"Escribe tu consulta y presiona [bold]Enter[/bold].\n"
@@ -79,7 +80,7 @@ def main():
     )
 
     db = DatabaseManager()
-    client = KimiEmbeddingsClient()
+    client = get_embeddings_client()
 
     # Verificar conexión y contar documentos
     try:

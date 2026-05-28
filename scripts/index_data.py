@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Carga datos desde un CSV y los indexa en PostgreSQL con embeddings de Kimi."""
+"""Carga datos desde un CSV y los indexa en PostgreSQL con embeddings."""
 
 import argparse
 import sys
@@ -9,7 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from rich.console import Console
 from src.database import DatabaseManager
-from src.embeddings import KimiEmbeddingsClient
+from src.embeddings import get_embeddings_client
 from src.indexer import index_csv_file
 
 console = Console()
@@ -31,7 +31,7 @@ def main():
         sys.exit(1)
 
     db = DatabaseManager()
-    client = KimiEmbeddingsClient()
+    client = get_embeddings_client()
 
     index_csv_file(str(csv_path), db, client)
 

@@ -1,14 +1,16 @@
 # 🔍 Búsqueda Semántica POC
 
-> Proof of Concept de búsqueda semántica con **embeddings de Kimi (Moonshot AI)**, **PostgreSQL + pgvector** y una **CLI interactiva en Python**.
+> Proof of Concept de búsqueda semántica con **embeddings de Jina AI o Local**, **PostgreSQL + pgvector** y una **CLI interactiva en Python**.
 
-Este proyecto demuestra cómo construir un sistema de búsqueda por similitud semántica desde cero: convierte textos en vectores numéricos usando la API de Kimi, los almacena en PostgreSQL con la extensión `pgvector`, y permite consultarlos desde una interfaz de terminal elegante gracias a [Rich](https://github.com/Textualize/rich).
+Este proyecto demuestra cómo construir un sistema de búsqueda por similitud semántica desde cero: convierte textos en vectores numéricos usando el proveedor de embeddings que elijas (API de Jina AI o modelos locales con `sentence-transformers`), los almacena en PostgreSQL con la extensión `pgvector`, y permite consultarlos desde una interfaz de terminal elegante gracias a [Rich](https://github.com/Textualize/rich).
 
 ---
 
 ## ✨ Características
 
-- 🤖 **Embeddings con Kimi API** — Usa el modelo `model-embedding-001` de Moonshot AI para generar representaciones vectoriales de texto.
+- 🤖 **Dos proveedores de embeddings** — Elige entre:
+  - **Jina AI** (`jina-embeddings-v3`): API gratuita (requiere registro), multilingüe, muy buena calidad.
+  - **Local** (`sentence-transformers`): 100% offline, sin API keys, sin límites de uso.
 - 🐘 **PostgreSQL + pgvector** — Almacenamiento y búsqueda de vectores con similitud coseno directamente en SQL.
 - 🐳 **Docker** — Levanta la base de datos en un solo comando con Docker Compose.
 - 📊 **CLI interactiva con Rich** — Tablas formateadas, colores, spinners de carga y experiencia de usuario en terminal.
@@ -22,14 +24,14 @@ Este proyecto demuestra cómo construir un sistema de búsqueda por similitud se
 ```
 ┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
 │   Dataset CSV   │────▶│  Indexer (Python)│────▶│ PostgreSQL +    │
-│   (ejemplo)     │     │  - Kimi API      │     │ pgvector        │
+│   (ejemplo)     │     │  - Jina / Local  │     │ pgvector        │
 └─────────────────┘     │  - Embeddings    │     │ (Docker)        │
                         └──────────────────┘     └─────────────────┘
                                                           ▲
                                                           │ consulta SQL
 ┌─────────────────┐     ┌──────────────────┐              │
 │   Usuario CLI   │────▶│  Search App      │──────────────┘
-│   (Rich)        │     │  - Kimi API      │
+│   (Rich)        │     │  - Jina / Local  │
 └─────────────────┘     │  - Similitud     │
                         └──────────────────┘
 ```
@@ -43,7 +45,8 @@ Este proyecto demuestra cómo construir un sistema de búsqueda por similitud se
 | Docker | 20.10+ | [Instalar](https://docs.docker.com/get-docker/) |
 | Docker Compose | 2.0+ | [Instalar](https://docs.docker.com/compose/install/) |
 | Python | 3.10+ | [Instalar](https://www.python.org/downloads/) |
-| API Key Kimi | — | [Obtener](https://platform.moonshot.cn/) |
+
+> **No necesitas API key** para empezar. El proveedor **Local** funciona 100% offline.
 
 ---
 
@@ -65,19 +68,31 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
+> ⚠️ La instalación de `sentence-transformers` descarga PyTorch, lo cual puede tardar varios minutos la primera vez.
+
 ### 3. Configurar variables de entorno
 
+Elige tu proveedor y copia el `.env` correspondiente:
+
+#### Opción A: Jina AI (recomendada si tienes API key)
 ```bash
 cp .env.example .env
 ```
 
-Edita `.env` y agrega tu API key de Kimi:
+Configura tu API key de Jina AI (gratuita en [jina.ai/embeddings](https://jina.ai/embeddings)):
 
 ```env
-KIMI_API_KEY=sk-tu-api-key-aqui
+EMBEDDING_API_KEY=jina_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
-> 🔑 Obtén tu API key en [https://platform.moonshot.cn/](https://platform.moonshot.cn/)
+#### Opción B: Local (sentence-transformers)
+Edita `.env` y cambia:
+
+```env
+EMBEDDING_PROVIDER=local
+EMBEDDING_MODEL=paraphrase-multilingual-MiniLM-L12-v2
+EMBEDDING_DIMENSION=384
+```
 
 ### 4. Levantar PostgreSQL con pgvector
 
@@ -86,6 +101,8 @@ docker compose up -d
 ```
 
 ### 5. Inicializar la base de datos
+
+> ⚠️ Si cambiaste a `EMBEDDING_DIMENSION=384`, ajusta también `scripts/db_schema.sql` (`VECTOR(384)`) antes de ejecutar esto, o borra el volumen previo con `docker compose down -v`.
 
 ```bash
 python scripts/init_db.py
@@ -128,14 +145,14 @@ python scripts/search.py
 Interfaz esperada:
 
 ```
-╭───────────────────────────────────────╮
-│ 🔍 Búsqueda Semántica POC             │
-│ Modelo: model-embedding-001           │
-│ Base de datos: PostgreSQL + pgvector  │
-│                                       │
-│ Escribe tu consulta y presiona Enter. │
-│ Escribe exit o quit para salir.       │
-╰───────────────────────────────────────╯
+╭───────────────────────────────────────────────────╮
+│ 🔍 Búsqueda Semántica POC                         │
+│ Proveedor: jina | Modelo: jina-embeddings-v3      │
+│ Base de datos: PostgreSQL + pgvector              │
+│                                                   │
+│ Escribe tu consulta y presiona Enter.             │
+│ Escribe exit o quit para salir.                   │
+╰───────────────────────────────────────────────────╯
 
 📦 52 documentos indexados en la base de datos
 
@@ -188,12 +205,12 @@ busqueda_semantica/
 │   ├── __init__.py
 │   ├── config.py               # Configuración con pydantic-settings
 │   ├── database.py             # SQLAlchemy ORM + operaciones pgvector
-│   ├── embeddings.py           # Cliente HTTP para API de Kimi
+│   ├── embeddings.py           # Clientes Jina AI + Local (factory)
 │   └── indexer.py              # Lógica de indexación CSV por batches
 │
 └── scripts/
     ├── init_db.py              # Inicializa extensión pgvector, tablas e índices
-    ├── index_data.py           # Carga CSV y genera embeddings vía Kimi API
+    ├── index_data.py           # Carga CSV y genera embeddings
     ├── search.py               # CLI interactiva con Rich
     └── db_schema.sql           # Schema SQL puro para recrear la BD sin Python
 ```
@@ -206,11 +223,22 @@ Todas las variables se cargan desde el archivo `.env`:
 
 | Variable | Descripción | Valor por defecto |
 |----------|-------------|-------------------|
-| `KIMI_API_KEY` | API key de Moonshot AI (requerida) | — |
-| `KIMI_BASE_URL` | URL base de la API de Kimi | `https://api.moonshot.cn/v1` |
-| `EMBEDDING_MODEL` | Modelo de embeddings | `model-embedding-001` |
-| `EMBEDDING_DIMENSION` | Dimensión del vector de embeddings | `1536` |
+| `EMBEDDING_PROVIDER` | Proveedor: `jina` o `local` | `jina` |
+| `EMBEDDING_API_KEY` | API key de Jina AI (requerida para Jina) | — |
+| `EMBEDDING_BASE_URL` | URL base de la API | `https://api.jina.ai/v1` |
+| `EMBEDDING_MODEL` | Modelo de embeddings | `jina-embeddings-v3` |
+| `EMBEDDING_DIMENSION` | Dimensión del vector | `1024` |
 | `DATABASE_URL` | URL de conexión a PostgreSQL | `postgresql+psycopg2://semantic_user:semantic_pass@localhost:5432/semantic_search` |
+
+### Combinaciones válidas
+
+| Proveedor | Modelo | Dimensión | Requiere API key | Requiere internet |
+|-----------|--------|-----------|------------------|-------------------|
+| `jina` | `jina-embeddings-v3` | `1024` | ✅ (gratuita) | ✅ |
+| `local` | `paraphrase-multilingual-MiniLM-L12-v2` | `384` | ❌ | ❌ |
+| `local` | `all-MiniLM-L6-v2` | `384` | ❌ | ❌ |
+
+> ⚠️ **Importante**: Si cambias de proveedor o modelo, asegúrate de que `EMBEDDING_DIMENSION` coincida con la dimensión real del modelo. De lo contrario, `init_db.py` fallará con un error de validación.
 
 ---
 
@@ -224,7 +252,7 @@ Para recrear la base de datos en otro equipo **sin usar Python**, ejecuta el sch
 # Asegúrate de que el contenedor esté corriendo
 docker compose up -d
 
-# Ejecutar el schema
+# Ejecutar el schema (ajusta VECTOR(1024) a VECTOR(384) si usas local)
 psql -h localhost -U semantic_user -d semantic_search -f scripts/db_schema.sql
 ```
 
@@ -243,7 +271,7 @@ CREATE TABLE IF NOT EXISTS documents (
     id SERIAL PRIMARY KEY,
     content TEXT NOT NULL,
     metadata JSONB,
-    embedding VECTOR(1536)
+    embedding VECTOR(1024)  -- <-- cambiar a 384 para modelos locales
 );
 
 CREATE INDEX IF NOT EXISTS idx_documents_embedding
@@ -268,36 +296,38 @@ Puedes reemplazar este CSV por tu propio dataset — solo asegúrate de incluir 
 
 ---
 
-## 🧪 Testing local
+## 🧪 Cambiar de proveedor sin perder datos
 
-Si quieres probar el flujo completo sin consumir la API de Kimi, puedes crear un script que inserte vectores aleatorios directamente en la base de datos:
+Si ya indexaste con un proveedor y quieres probar otro, debes **recrear la tabla** porque cada modelo genera vectores de distinta dimensión:
 
-```python
-import random
-from src.database import DatabaseManager
+```bash
+# 1. Borrar datos previos
+docker compose down -v
+docker compose up -d
 
-db = DatabaseManager()
+# 2. Actualizar .env con el nuevo proveedor/modelo/dimensión
 
-fake_docs = [
-    {"content": "Documento de prueba 1", "embedding": [random.random() for _ in range(1536)], "metadata": {"category": "Test"}},
-    {"content": "Documento de prueba 2", "embedding": [random.random() for _ in range(1536)], "metadata": {"category": "Test"}},
-]
+# 3. Re-crear tablas
+python scripts/init_db.py
 
-db.add_documents_bulk(fake_docs)
-print(f"Documentos en BD: {db.count_documents()}")
+# 4. Re-indexar
+python scripts/index_data.py --file data/sample_documents.csv
 ```
 
 ---
 
 ## 🐛 Troubleshooting
 
-### Error: `KIMI_API_KEY no está configurada`
+### Error: `EMBEDDING_DIMENSION no coincide con la dimensión del modelo`
 
-Asegúrate de crear el archivo `.env` a partir del ejemplo:
+Asegúrate de que `EMBEDDING_DIMENSION` en tu `.env` coincida con la dimensión real del modelo:
 
 ```bash
-cp .env.example .env
-# Edita .env y agrega tu API key
+# Para Jina
+EMBEDDING_DIMENSION=1024
+
+# Para sentence-transformers (MiniLM)
+EMBEDDING_DIMENSION=384
 ```
 
 ### Error de conexión a PostgreSQL
@@ -320,6 +350,16 @@ image: pgvector/pgvector:pg15
 ```
 
 Si cambiaste a una imagen de PostgreSQL estándar, la extensión `pgvector` no estará disponible.
+
+### Error: `sentence-transformers no está instalado`
+
+Si usas el proveedor `local` y te falta la dependencia:
+
+```bash
+pip install sentence-transformers
+```
+
+La primera ejecución descargará el modelo (~400MB) y puede tardar unos minutos.
 
 ---
 
@@ -345,6 +385,8 @@ docker compose down -v
 - [Rich](https://github.com/Textualize/rich)
 - [Httpx](https://www.python-httpx.org/)
 - [Pydantic Settings](https://docs.pydantic.dev/latest/concepts/pydantic_settings/)
+- [Jina AI Embeddings](https://jina.ai/embeddings)
+- [Sentence-Transformers](https://www.sbert.net/)
 
 ---
 
