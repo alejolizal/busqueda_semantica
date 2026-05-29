@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import List
 
+import ssl
+
 import httpx
 from tenacity import retry, stop_after_attempt, wait_exponential
 
@@ -50,7 +52,9 @@ class JinaEmbeddingsClient(BaseEmbeddingsClient):
             "input": texts,
         }
 
-        with httpx.Client(timeout=60.0) as client:
+        # NOTA: verify=False es temporal para este POC en ambiente corporativo
+        # con proxy SSL inspection (Forcepoint). En producción debe ser True.
+        with httpx.Client(timeout=60.0, verify=False) as client:
             response = client.post(url, headers=self.headers, json=payload)
             if response.status_code == 401:
                 raise ValueError(

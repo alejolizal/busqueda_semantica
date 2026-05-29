@@ -105,8 +105,10 @@ docker compose up -d
 > ⚠️ Si cambiaste a `EMBEDDING_DIMENSION=384`, ajusta también `scripts/db_schema.sql` (`VECTOR(384)`) antes de ejecutar esto, o borra el volumen previo con `docker compose down -v`.
 
 ```bash
-python scripts/init_db.py
+./venv/bin/python scripts/init_db.py
 ```
+
+> 💡 **Nota:** Si activaste el entorno virtual con `source venv/bin/activate`, puedes usar `python scripts/init_db.py` directamente.
 
 Salida esperada:
 
@@ -121,7 +123,7 @@ Salida esperada:
 ### 6. Indexar datos de ejemplo
 
 ```bash
-python scripts/index_data.py --file data/sample_documents.csv
+./venv/bin/python scripts/index_data.py --file data/sample_documents.csv
 ```
 
 Salida esperada:
@@ -139,7 +141,7 @@ Salida esperada:
 ### Iniciar la búsqueda interactiva
 
 ```bash
-python scripts/search.py
+./venv/bin/python scripts/search.py
 ```
 
 Interfaz esperada:
@@ -366,12 +368,27 @@ image: pgvector/pgvector:pg15
 
 Si cambiaste a una imagen de PostgreSQL estándar, la extensión `pgvector` no estará disponible.
 
+### Error: `ModuleNotFoundError: No module named 'sqlalchemy'` (u otro módulo)
+
+Estás usando el `python3` del sistema en lugar del del entorno virtual. Usa siempre:
+
+```bash
+./venv/bin/python scripts/<script>.py
+```
+
+O activa primero el entorno virtual:
+
+```bash
+source venv/bin/activate
+python scripts/<script>.py
+```
+
 ### Error: `sentence-transformers no está instalado`
 
 Si usas el proveedor `local` y te falta la dependencia:
 
 ```bash
-pip install sentence-transformers
+./venv/bin/pip install sentence-transformers
 ```
 
 La primera ejecución descargará el modelo (~400MB) y puede tardar unos minutos.
