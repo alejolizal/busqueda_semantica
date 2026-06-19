@@ -98,7 +98,46 @@ En la vida real esos vectores no tienen 2 o 3 dimensiones, sino **cientos o mile
 
 ---
 
-## 4️⃣ Similitud del coseno: ¿qué tan parecidos son dos vectores?
+## 4️⃣ Word2Vec: el abuelo de los embeddings
+
+**Word2Vec** es una técnica creada por Google en 2013 (por Tomas Mikolov y su equipo). Fue de las primeras en lograr que las computadoras entendieran relaciones entre palabras de forma automática.
+
+### ¿Cómo aprende Word2Vec?
+
+Con una idea muy simple pero poderosa: **"dime con quién te juntas y te diré quién eres"**.
+
+El modelo lee montones de texto y aprende que palabras suelen aparecer cerca de otras. Si siempre ve frases como:
+
+- "el **rey** lleva una **corona**"
+- "la **reina** se sienta en el **trono**"
+- "el **hombre** y la **mujer**"
+
+Entonces termina poniendo los vectores de esas palabras cerca en el espacio.
+
+![Word2Vec vecindario](images/diagrama_word2vec_vecindario.svg)
+
+### 🤯 El famoso ejemplo: `rey - hombre + mujer ≈ reina`
+
+Si restas el vector de `hombre` al vector de `rey` y le sumas el vector de `mujer`, el resultado es muy parecido al vector de `reina`.
+
+Es como si el espacio vectorial tuviera direcciones de significado:
+
+- Una dirección para "género".
+- Otra dirección para "monarquía".
+- Otra para "países" vs "capitales".
+
+### ⚠️ Limitación de Word2Vec
+
+Word2Vec asigna **un solo vector por palabra**. Eso significa que no distingue contextos:
+
+- "Banco" de sentarse y "banco" de dinero tienen el mismo vector.
+- "apple" la fruta y "Apple" la empresa también.
+
+Para eso necesitamos algo más moderno: los **Transformers**.
+
+---
+
+## 5️⃣ Similitud del coseno: ¿qué tan parecidos son dos vectores?
 
 Ya tenemos textos convertidos en vectores. Ahora la pregunta es: **¿cómo sabemos si dos vectores son similares?**
 
@@ -149,45 +188,6 @@ similitud = 1 - distancia_coseno
 Por eso en los resultados de búsqueda ves scores como **0.89**, **0.84**, etc. Cuanto más cercano a 1, más relevante es el documento para tu consulta.
 
 > **Frase para llevarse**: la similitud del coseno nos dice si dos textos "apuntan en la misma dirección" de significado.
-
----
-
-## 5️⃣ Word2Vec: el abuelo de los embeddings
-
-**Word2Vec** es una técnica creada por Google en 2013 (por Tomas Mikolov y su equipo). Fue de las primeras en lograr que las computadoras entendieran relaciones entre palabras de forma automática.
-
-### ¿Cómo aprende Word2Vec?
-
-Con una idea muy simple pero poderosa: **"dime con quién te juntas y te diré quién eres"**.
-
-El modelo lee montones de texto y aprende que palabras suelen aparecer cerca de otras. Si siempre ve frases como:
-
-- "el **rey** lleva una **corona**"
-- "la **reina** se sienta en el **trono**"
-- "el **hombre** y la **mujer**"
-
-Entonces termina poniendo los vectores de esas palabras cerca en el espacio.
-
-![Word2Vec vecindario](images/diagrama_word2vec_vecindario.svg)
-
-### 🤯 El famoso ejemplo: `rey - hombre + mujer ≈ reina`
-
-Si restas el vector de `hombre` al vector de `rey` y le sumas el vector de `mujer`, el resultado es muy parecido al vector de `reina`.
-
-Es como si el espacio vectorial tuviera direcciones de significado:
-
-- Una dirección para "género".
-- Otra dirección para "monarquía".
-- Otra para "países" vs "capitales".
-
-### ⚠️ Limitación de Word2Vec
-
-Word2Vec asigna **un solo vector por palabra**. Eso significa que no distingue contextos:
-
-- "Banco" de sentarse y "banco" de dinero tienen el mismo vector.
-- "Manzana" la fruta y "Manzana" la empresa también.
-
-Para eso necesitamos algo más moderno: los **Transformers**.
 
 ---
 
@@ -327,9 +327,9 @@ Tokens (pedacitos)
     ↓
 Embeddings (números con significado)
     ↓
-Similitud del coseno (comparar vectores)
-    ↓
 Word2Vec (el pionero de Google)
+    ↓
+Similitud del coseno (comparar vectores)
     ↓
 Transformers (contexto + atención)
     ↓
