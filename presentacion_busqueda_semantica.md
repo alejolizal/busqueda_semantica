@@ -98,7 +98,61 @@ En la vida real esos vectores no tienen 2 o 3 dimensiones, sino **cientos o mile
 
 ---
 
-## 4️⃣ Word2Vec: el abuelo de los embeddings
+## 4️⃣ Similitud del coseno: ¿qué tan parecidos son dos vectores?
+
+Ya tenemos textos convertidos en vectores. Ahora la pregunta es: **¿cómo sabemos si dos vectores son similares?**
+
+La respuesta más usada en búsqueda semántica es la **similitud del coseno**.
+
+### 🧭 La analogía de las flechas
+
+Imagina que cada vector es una flecha que parte desde el mismo punto (el origen). Dos flechas pueden apuntar en direcciones muy parecidas o en direcciones muy distintas.
+
+- Si apuntan **casi en la misma dirección** → el ángulo entre ellas es pequeño → son **muy similares**.
+- Si apuntan en **direcciones muy distintas** → el ángulo entre ellas es grande → son **poco similares**.
+
+La similitud del coseno mide justamente eso: el **coseno del ángulo** entre los dos vectores.
+
+![Similitud del coseno](images/diagrama_similitud_coseno.svg)
+
+### 📏 Cómo se lee el resultado
+
+| Similitud del coseno | Significado |
+|---------------------:|-------------|
+| **1.0** | Vectores idénticos (apuntan exactamente a la misma dirección) |
+| **0.8 - 0.99** | Muy parecidos |
+| **0.5 - 0.8** | Algo parecidos |
+| **0.0** | No tienen relación (ángulo de 90°) |
+| **-1.0** | Opuestos totalmente (en búsqueda semántica rara vez vemos esto) |
+
+### 💡 ¿Por qué usamos coseno y no distancia "recta"?
+
+Porque lo que nos importa es la **dirección**, no el tamaño.
+
+Imagina dos frases:
+
+- "El gato duerme".
+- "El pequeño gato duerme profundamente en su cama".
+
+La segunda frase es más larga, así que su vector probablemente tendrá números más grandes. Pero la **dirección** del vector sigue siendo muy parecida a la primera porque hablan de lo mismo: un gato durmiendo.
+
+La similitud del coseno ignora el tamaño y se fija solo en la dirección. Eso la hace ideal para comparar significados.
+
+### 🔍 ¿Dónde se usa en nuestro POC?
+
+En el proyecto, `pgvector` calcula la distancia coseno con el operador `<=>`. Luego el código convierte esa distancia en un score de similitud:
+
+```
+similitud = 1 - distancia_coseno
+```
+
+Por eso en los resultados de búsqueda ves scores como **0.89**, **0.84**, etc. Cuanto más cercano a 1, más relevante es el documento para tu consulta.
+
+> **Frase para llevarse**: la similitud del coseno nos dice si dos textos "apuntan en la misma dirección" de significado.
+
+---
+
+## 5️⃣ Word2Vec: el abuelo de los embeddings
 
 **Word2Vec** es una técnica creada por Google en 2013 (por Tomas Mikolov y su equipo). Fue de las primeras en lograr que las computadoras entendieran relaciones entre palabras de forma automática.
 
@@ -137,7 +191,7 @@ Para eso necesitamos algo más moderno: los **Transformers**.
 
 ---
 
-## 5️⃣ Transformers: la revolución que entiende el contexto
+## 6️⃣ Transformers: la revolución que entiende el contexto
 
 Los **Transformers** son la arquitectura que usan modelos como GPT, Llama, Gemini, BERT, T5, etc.
 
@@ -150,6 +204,23 @@ Antes, los modelos leían texto palabra por palabra, como nosotros cuando leemos
 > "¿Qué palabras son importantes para entender esta otra palabra?"
 
 Eso se llama **self-attention** (atención sobre sí mismo).
+
+### 🧱 Un modelo no tiene un solo Transformer, tiene muchos apilados
+
+Aquí hay un punto que suele confundir: cuando hablamos de "un Transformer", en realidad nos referimos a un **bloque** que hace self-attention y luego pasa los datos por una red neuronal (MLP). Los modelos grandes **apilan muchos de estos bloques uno tras otro**.
+
+Es como si cada bloque fuera un lector que revisa el texto y le agrega un poco más de entendimiento:
+
+| Modelo | Bloques Transformer | Parámetros totales |
+|--------|--------------------:|-------------------:|
+| GPT-2 small | **12** | 124 millones |
+| GPT-3 | **96** | 175 mil millones |
+| GPT-4 | aún más | se estima ~1.8 billones |
+| Jina embeddings v3 (usado en este POC) | varios bloques | 570 millones |
+
+> **Frase clave**: cada bloque Transformer toma la representación de los tokens, les aplica atención y las refiniza. El siguiente bloque recibe ese refinamiento y lo mejora aún más. Al final, después de pasar por docenas de bloques, el modelo tiene una comprensión muy rica del texto.
+
+Por eso un modelo como GPT-2 small es capaz de entender contexto: no es magia, son **12 bloques Transformer trabajando en cadena**.
 
 ### 🎮 Demo en vivo
 
@@ -178,7 +249,7 @@ Aunque la palabra sea la misma, el vector cambia según el contexto. Eso hace qu
 
 ---
 
-## 6️⃣ Nuestro POC: Búsqueda Semántica con Python
+## 7️⃣ Nuestro POC: Búsqueda Semántica con Python
 
 Ahora que entendemos los conceptos, veamos cómo funciona el proyecto que tenemos en este repositorio.
 
@@ -216,7 +287,7 @@ Ahora que entendemos los conceptos, veamos cómo funciona el proyecto que tenemo
 
 ---
 
-## 🚀 Demo sugerida para tus colegas
+## 🚀 Demo
 
 Si quieres mostrarlo en vivo, estos son los comandos:
 
@@ -231,7 +302,7 @@ python scripts/init_db.py
 python scripts/index_data.py --file data/sample_documents.csv
 
 # 4. Abrir la CLI de búsqueda
-python scripts/search.py
+./venv/bin/python scripts/search.py
 ```
 
 Luego prueba estas consultas en la CLI:
@@ -255,6 +326,8 @@ Texto humano
 Tokens (pedacitos)
     ↓
 Embeddings (números con significado)
+    ↓
+Similitud del coseno (comparar vectores)
     ↓
 Word2Vec (el pionero de Google)
     ↓
