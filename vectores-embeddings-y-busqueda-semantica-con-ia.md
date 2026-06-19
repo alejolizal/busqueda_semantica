@@ -403,6 +403,36 @@ La magia está en que si buscas "máquinas que aprenden solas", probablemente ta
 
 ---
 
+## 📸 Así se ve la POC en acción
+
+Si no puedes ejecutar la demo en vivo, aquí tienes una captura de cómo responde la CLI ante una consulta simple:
+
+```text
+╭────────────────────────────────────────────────────────────────╮
+│ 🔍 Búsqueda Semántica POC                                      │
+│ Proveedor: jina | Modelo: jina-embeddings-v3                   │
+│ Base de datos: PostgreSQL + pgvector | Umbral: 0.35 | Top-K: 5 │
+│                                                                │
+│ Escribe tu consulta y presiona Enter.                          │
+│ Escribe exit o quit para salir.                                │
+╰────────────────────────────────────────────────────────────────╯
+📦 52 documentos indexados en la base de datos
+
+➜ Consulta: hola
+                                                        Resultados para: "hola"
+╭──────┬──────────┬─────────────────┬─────────────────────────────────────────────────────────────────────────────────────────────────╮
+│    # │  Score   │ Categoría       │ Contenido                                                                                       │
+├──────┼──────────┼─────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────┤
+│    1 │  0.360   │ Historia        │ La independencia de la India en 1947 fue liderada por Mahatma Gandhi.                           │
+│    2 │  0.352   │ Arte            │ El hip-hop surgió en el Bronx, Nueva York, como expresión cultural de comunidades              │
+│      │          │                 │ afroamericanas y latinas.                                                                       │
+╰──────┴──────────┴─────────────────┴─────────────────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+> **Observación interesante**: la consulta fue solo `"hola"`, pero el modelo igual encontró documentos con score mayor al umbral de 0.35. En una presentación en vivo puedes mostrar consultas más elaboradas como `"inteligencia artificial"` o `"arte moderno"` para ver resultados mucho más relevantes.
+
+---
+
 ## 🧠 Resumen: el camino que recorrimos
 
 ```
