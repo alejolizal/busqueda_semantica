@@ -98,7 +98,46 @@ En la vida real esos vectores no tienen 2 o 3 dimensiones, sino **cientos o mile
 
 ---
 
-## 4️⃣ Similitud del coseno: ¿qué tan parecidos son dos vectores?
+## 4️⃣ Word2Vec: el abuelo de los embeddings
+
+**Word2Vec** es una técnica creada por Google en 2013 (por Tomas Mikolov y su equipo). Fue de las primeras en lograr que las computadoras entendieran relaciones entre palabras de forma automática.
+
+### ¿Cómo aprende Word2Vec?
+
+Con una idea muy simple pero poderosa: **"dime con quién te juntas y te diré quién eres"**.
+
+El modelo lee montones de texto y aprende que palabras suelen aparecer cerca de otras. Si siempre ve frases como:
+
+- "el **rey** lleva una **corona**"
+- "la **reina** se sienta en el **trono**"
+- "el **hombre** y la **mujer**"
+
+Entonces termina poniendo los vectores de esas palabras cerca en el espacio.
+
+![Word2Vec vecindario](images/diagrama_word2vec_vecindario.svg)
+
+### 🤯 El famoso ejemplo: `rey - hombre + mujer ≈ reina`
+
+Si restas el vector de `hombre` al vector de `rey` y le sumas el vector de `mujer`, el resultado es muy parecido al vector de `reina`.
+
+Es como si el espacio vectorial tuviera direcciones de significado:
+
+- Una dirección para "género".
+- Otra dirección para "monarquía".
+- Otra para "países" vs "capitales".
+
+### ⚠️ Limitación de Word2Vec
+
+Word2Vec asigna **un solo vector por palabra**. Eso significa que no distingue contextos:
+
+- "Banco" de sentarse y "banco" de dinero tienen el mismo vector.
+- "apple" la fruta y "Apple" la empresa también.
+
+Para eso necesitamos algo más moderno: los **Transformers**.
+
+---
+
+## 5️⃣ Similitud del coseno: ¿qué tan parecidos son dos vectores?
 
 Ya tenemos textos convertidos en vectores. Ahora la pregunta es: **¿cómo sabemos si dos vectores son similares?**
 
@@ -149,45 +188,6 @@ similitud = 1 - distancia_coseno
 Por eso en los resultados de búsqueda ves scores como **0.89**, **0.84**, etc. Cuanto más cercano a 1, más relevante es el documento para tu consulta.
 
 > **Frase para llevarse**: la similitud del coseno nos dice si dos textos "apuntan en la misma dirección" de significado.
-
----
-
-## 5️⃣ Word2Vec: el abuelo de los embeddings
-
-**Word2Vec** es una técnica creada por Google en 2013 (por Tomas Mikolov y su equipo). Fue de las primeras en lograr que las computadoras entendieran relaciones entre palabras de forma automática.
-
-### ¿Cómo aprende Word2Vec?
-
-Con una idea muy simple pero poderosa: **"dime con quién te juntas y te diré quién eres"**.
-
-El modelo lee montones de texto y aprende que palabras suelen aparecer cerca de otras. Si siempre ve frases como:
-
-- "el **rey** lleva una **corona**"
-- "la **reina** se sienta en el **trono**"
-- "el **hombre** y la **mujer**"
-
-Entonces termina poniendo los vectores de esas palabras cerca en el espacio.
-
-![Word2Vec vecindario](images/diagrama_word2vec_vecindario.svg)
-
-### 🤯 El famoso ejemplo: `rey - hombre + mujer ≈ reina`
-
-Si restas el vector de `hombre` al vector de `rey` y le sumas el vector de `mujer`, el resultado es muy parecido al vector de `reina`.
-
-Es como si el espacio vectorial tuviera direcciones de significado:
-
-- Una dirección para "género".
-- Otra dirección para "monarquía".
-- Otra para "países" vs "capitales".
-
-### ⚠️ Limitación de Word2Vec
-
-Word2Vec asigna **un solo vector por palabra**. Eso significa que no distingue contextos:
-
-- "Banco" de sentarse y "banco" de dinero tienen el mismo vector.
-- "Manzana" la fruta y "Manzana" la empresa también.
-
-Para eso necesitamos algo más moderno: los **Transformers**.
 
 ---
 
@@ -305,6 +305,91 @@ python scripts/index_data.py --file data/sample_documents.csv
 ./venv/bin/python scripts/search.py
 ```
 
+### 🔍 Trozos de código clave
+
+Si quieres mostrar qué pasa "por debajo", estos son los pedazos más importantes del código.
+
+#### 1. Conexión a Jina AI para obtener los embeddings
+
+En `src/embeddings.py`, el `JinaEmbeddingsClient` arma el payload y llama a la API:
+
+```python
+url = f"{self.base_url}/embeddings"
+payload = {
+    "model": self.model,
+    "input": texts,
+}
+
+with httpx.Client(timeout=60.0, verify=False) as client:
+    response = client.post(url, headers=self.headers, json=payload)
+    response.raise_for_status()
+    data = response.json()
+
+embeddings = sorted(data["data"], key=lambda x: x["index"])
+return [item["embedding"] for item in embeddings]
+```
+
+> **Lo que hace**: le envía los textos a Jina AI y recibe una lista de vectores (las "coordenadas" de cada texto).
+
+#### 2. Definición de la tabla con el vector
+
+En `src/database.py`, el modelo `Document` indica que cada fila guarda un vector:
+
+```python
+class Document(Base):
+    __tablename__ = "documents"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    content = Column(Text, nullable=False)
+    metadata_ = Column("metadata", JSON, nullable=True)
+    embedding = Column(Vector(settings.embedding_dimension))
+```
+
+> **Lo que hace**: crea la tabla `documents` con las columnas `id`, `content`, `metadata` y `embedding`, donde `embedding` es del tipo `VECTOR(1024)` o `VECTOR(384)` según el modelo.
+
+#### 3. Guardar documentos con sus vectores
+
+También en `src/database.py`, `add_documents_bulk` inserta todo junto:
+
+```python
+def add_documents_bulk(self, documents: List[dict]):
+    session = self.SessionLocal()
+    try:
+        docs = [
+            Document(
+                content=d["content"],
+                embedding=d["embedding"],
+                metadata_=d.get("metadata"),
+            )
+            for d in documents
+        ]
+        session.add_all(docs)
+        session.commit()
+```
+
+> **Lo que hace**: toma una lista de documentos ya con sus embeddings y los guarda en PostgreSQL en una sola transacción.
+
+#### 4. Búsqueda por similitud coseno
+
+La consulta SQL que hace la magia está en `search_similar`:
+
+```python
+sql = text(
+    """
+    SELECT
+        id,
+        content,
+        metadata,
+        1 - (embedding <=> :embedding) AS similarity_score
+    FROM documents
+    ORDER BY embedding <=> :embedding
+    LIMIT :top_k
+    """
+)
+```
+
+> **Lo que hace**: `embedding <=> :embedding` calcula la distancia coseno entre el vector de la consulta y los vectores guardados. `1 - distancia` nos da el score de similitud. `ORDER BY` y `LIMIT` traen los más parecidos.
+
 Luego prueba estas consultas en la CLI:
 
 | Consulta | Resultado esperado |
@@ -318,6 +403,36 @@ La magia está en que si buscas "máquinas que aprenden solas", probablemente ta
 
 ---
 
+## 📸 Así se ve la POC en acción
+
+Si no puedes ejecutar la demo en vivo, aquí tienes una captura de cómo responde la CLI ante una consulta simple:
+
+```text
+╭────────────────────────────────────────────────────────────────╮
+│ 🔍 Búsqueda Semántica POC                                      │
+│ Proveedor: jina | Modelo: jina-embeddings-v3                   │
+│ Base de datos: PostgreSQL + pgvector | Umbral: 0.35 | Top-K: 5 │
+│                                                                │
+│ Escribe tu consulta y presiona Enter.                          │
+│ Escribe exit o quit para salir.                                │
+╰────────────────────────────────────────────────────────────────╯
+📦 52 documentos indexados en la base de datos
+
+➜ Consulta: hola
+                                                        Resultados para: "hola"
+╭──────┬──────────┬─────────────────┬─────────────────────────────────────────────────────────────────────────────────────────────────╮
+│    # │  Score   │ Categoría       │ Contenido                                                                                       │
+├──────┼──────────┼─────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────┤
+│    1 │  0.360   │ Historia        │ La independencia de la India en 1947 fue liderada por Mahatma Gandhi.                           │
+│    2 │  0.352   │ Arte            │ El hip-hop surgió en el Bronx, Nueva York, como expresión cultural de comunidades              │
+│      │          │                 │ afroamericanas y latinas.                                                                       │
+╰──────┴──────────┴─────────────────┴─────────────────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+> **Observación interesante**: la consulta fue solo `"hola"`, pero el modelo igual encontró documentos con score mayor al umbral de 0.35. En una presentación en vivo puedes mostrar consultas más elaboradas como `"inteligencia artificial"` o `"arte moderno"` para ver resultados mucho más relevantes.
+
+---
+
 ## 🧠 Resumen: el camino que recorrimos
 
 ```
@@ -327,9 +442,9 @@ Tokens (pedacitos)
     ↓
 Embeddings (números con significado)
     ↓
-Similitud del coseno (comparar vectores)
-    ↓
 Word2Vec (el pionero de Google)
+    ↓
+Similitud del coseno (comparar vectores)
     ↓
 Transformers (contexto + atención)
     ↓
