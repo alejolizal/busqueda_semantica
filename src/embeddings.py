@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-import ssl
 
 import httpx
 from tenacity import retry, stop_after_attempt, wait_exponential
@@ -40,11 +39,15 @@ class JinaEmbeddingsClient(BaseEmbeddingsClient):
         if self.api_key:
             self.headers["Authorization"] = f"Bearer {self.api_key}"
 
-    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
+    @retry(
+        stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10)
+    )
     def get_embedding(self, text: str) -> List[float]:
         return self.get_embeddings_batch([text])[0]
 
-    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
+    @retry(
+        stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10)
+    )
     def get_embeddings_batch(self, texts: List[str]) -> List[List[float]]:
         url = f"{self.base_url}/embeddings"
         payload = {
@@ -99,7 +102,9 @@ class LocalEmbeddingsClient(BaseEmbeddingsClient):
         return self.get_embeddings_batch([text])[0]
 
     def get_embeddings_batch(self, texts: List[str]) -> List[List[float]]:
-        embeddings = self.model.encode(texts, convert_to_tensor=False, show_progress_bar=False)
+        embeddings = self.model.encode(
+            texts, convert_to_tensor=False, show_progress_bar=False
+        )
         return embeddings.tolist()
 
 
@@ -113,6 +118,5 @@ def get_embeddings_client() -> BaseEmbeddingsClient:
         return LocalEmbeddingsClient()
     else:
         raise ValueError(
-            f"Proveedor de embeddings desconocido: '{provider}'. "
-            f"Usa 'jina' o 'local'."
+            f"Proveedor de embeddings desconocido: '{provider}'. Usa 'jina' o 'local'."
         )
