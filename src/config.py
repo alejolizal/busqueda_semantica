@@ -10,7 +10,9 @@ class Settings(BaseSettings):
 
     # Configuración de API (usada por Jina y otros proveedores API)
     embedding_api_key: str = Field("", alias="EMBEDDING_API_KEY")
-    embedding_base_url: str = Field("https://api.jina.ai/v1", alias="EMBEDDING_BASE_URL")
+    embedding_base_url: str = Field(
+        "https://api.jina.ai/v1", alias="EMBEDDING_BASE_URL"
+    )
 
     # Modelo y dimensión (debe ser coherente con el proveedor)
     embedding_model: str = Field("jina-embeddings-v3", alias="EMBEDDING_MODEL")

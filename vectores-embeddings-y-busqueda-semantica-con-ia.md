@@ -193,7 +193,7 @@ Por eso en los resultados de búsqueda ves scores como **0.89**, **0.84**, etc. 
 
 ## 6️⃣ Transformers: la revolución que entiende el contexto
 
-Los **Transformers** son la arquitectura que usan modelos como GPT, Llama, Gemini, BERT, T5, etc.
+Los **Transformers** son la arquitectura que usan modelos como GPT, Llama, Gemini, Kimi, DeepSeek, etc.
 
 Fueron presentados en el paper "Attention Is All You Need" en 2017 y cambiaron todo.
 

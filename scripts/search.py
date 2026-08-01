@@ -58,9 +58,17 @@ def display_results(results: list, query: str, threshold: float = 0.0):
     console.print(table)
 
 
-def run_search(db: DatabaseManager, client: BaseEmbeddingsClient, query: str, top_k: int = 5, threshold: float = 0.0):
+def run_search(
+    db: DatabaseManager,
+    client: BaseEmbeddingsClient,
+    query: str,
+    top_k: int = 5,
+    threshold: float = 0.0,
+):
     """Ejecuta una búsqueda semántica y muestra resultados."""
-    with console.status("[bold green]Generando embedding de la consulta...[/bold green]"):
+    with console.status(
+        "[bold green]Generando embedding de la consulta...[/bold green]"
+    ):
         query_embedding = client.get_embedding(query)
 
     with console.status("[bold blue]Buscando en PostgreSQL...[/bold blue]"):
@@ -93,9 +101,13 @@ def main():
     # Verificar conexión y contar documentos
     try:
         count = db.count_documents()
-        console.print(f"[dim]📦 {count} documentos indexados en la base de datos[/dim]\n")
+        console.print(
+            f"[dim]📦 {count} documentos indexados en la base de datos[/dim]\n"
+        )
     except Exception as e:
-        console.print(f"[bold red]❌ Error conectando a la base de datos: {e}[/bold red]")
+        console.print(
+            f"[bold red]❌ Error conectando a la base de datos: {e}[/bold red]"
+        )
         sys.exit(1)
 
     while True:
@@ -113,7 +125,13 @@ def main():
             break
 
         try:
-            run_search(db, client, query, top_k=settings.search_top_k, threshold=settings.search_threshold)
+            run_search(
+                db,
+                client,
+                query,
+                top_k=settings.search_top_k,
+                threshold=settings.search_threshold,
+            )
         except Exception as e:
             console.print(f"[bold red]❌ Error durante la búsqueda: {e}[/bold red]")
 

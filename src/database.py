@@ -1,4 +1,3 @@
-import json
 from typing import List, Optional
 
 from sqlalchemy import create_engine, Column, Integer, Text, JSON, text
@@ -39,7 +38,7 @@ class DatabaseManager:
         with self.engine.connect() as conn:
             conn.execute(
                 text(
-                    f"""
+                    """
                     CREATE INDEX IF NOT EXISTS idx_documents_embedding
                     ON documents USING ivfflat (embedding vector_cosine_ops)
                     WITH (lists = 100)
@@ -48,7 +47,9 @@ class DatabaseManager:
             )
             conn.commit()
 
-    def add_document(self, content: str, embedding: List[float], metadata: Optional[dict] = None):
+    def add_document(
+        self, content: str, embedding: List[float], metadata: Optional[dict] = None
+    ):
         """Inserta un documento con su embedding."""
         session = self.SessionLocal()
         try:
@@ -111,12 +112,14 @@ class DatabaseManager:
                 score = float(row["similarity_score"])
                 if threshold > 0 and score < threshold:
                     continue
-                rows.append({
-                    "id": row["id"],
-                    "content": row["content"],
-                    "metadata": row["metadata"],
-                    "similarity_score": score,
-                })
+                rows.append(
+                    {
+                        "id": row["id"],
+                        "content": row["content"],
+                        "metadata": row["metadata"],
+                        "similarity_score": score,
+                    }
+                )
             return rows
         finally:
             session.close()
