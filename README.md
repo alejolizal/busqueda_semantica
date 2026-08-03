@@ -120,7 +120,15 @@ Salida esperada:
 ✅ Base de datos lista para usar
 ```
 
-### 6. Indexar datos de ejemplo
+### 6. Indexar datos
+
+Sin argumentos, indexa **todos los CSVs pendientes** en la carpeta `data/`:
+
+```bash
+./venv/bin/python scripts/index_data.py
+```
+
+También puedes indexar un archivo específico:
 
 ```bash
 ./venv/bin/python scripts/index_data.py --file data/sample_documents.csv
@@ -132,7 +140,10 @@ Salida esperada:
 📄 Cargando 52 documentos desde data/sample_documents.csv...
 ✅ Indexados 52/52 documentos
 🎉 Indexación completa: 52 documentos en total
+📦 Archivo movido a data/procesados/sample_documents.csv
 ```
+
+> **Nota:** tras indexarse con éxito, cada CSV se mueve automáticamente a `data/procesados/` para evitar duplicados. Si ya existe un archivo con el mismo nombre, se agrega un timestamp sin sobrescribir.
 
 ---
 
@@ -201,7 +212,8 @@ busqueda_semantica/
 ├── README.md                   # Este archivo
 │
 ├── data/
-│   └── sample_documents.csv    # Dataset de ejemplo (52 documentos categorizados)
+│   ├── sample_documents.csv    # Dataset de ejemplo (52 documentos categorizados)
+│   └── procesados/             # CSVs ya indexados (se mueven aquí automáticamente)
 │
 ├── src/
 │   ├── __init__.py
@@ -212,7 +224,7 @@ busqueda_semantica/
 │
 └── scripts/
     ├── init_db.py              # Inicializa extensión pgvector, tablas e índices
-    ├── index_data.py           # Carga CSV y genera embeddings
+    ├── index_data.py           # Indexa CSVs de data/ y genera embeddings
     ├── search.py               # CLI interactiva con Rich
     └── db_schema.sql           # Schema SQL puro para recrear la BD sin Python
 ```
@@ -327,8 +339,8 @@ docker compose up -d
 # 3. Re-crear tablas
 python scripts/init_db.py
 
-# 4. Re-indexar
-python scripts/index_data.py --file data/sample_documents.csv
+# 4. Re-indexar (todos los CSVs pendientes en data/)
+python scripts/index_data.py
 ```
 
 ---

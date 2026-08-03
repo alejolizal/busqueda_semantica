@@ -1,0 +1,53 @@
+content,category
+"Richard Stallman fundó el proyecto GNU en 1983 con el objetivo de crear un sistema operativo completamente libre.",Personajes
+"Richard Stallman creó la Free Software Foundation en 1985 para apoyar el movimiento del software libre.",Personajes
+"Richard Stallman es el autor principal de la Licencia Pública General de GNU, conocida como GPL.",Personajes
+"Richard Stallman desarrolló el editor Emacs y el compilador GCC, piezas fundamentales del software libre.",Personajes
+"Richard Stallman acuñó el concepto de copyleft, que usa el derecho de autor para garantizar la libertad del software.",Personajes
+"Linus Torvalds comenzó a escribir el núcleo Linux en 1991 como un proyecto personal mientras estudiaba en la Universidad de Helsinki.",Personajes
+"Linus Torvalds anunció su núcleo en un famoso mensaje de Usenet describiéndolo como un pasatiempo gratuito.",Personajes
+"Linus Torvalds creó Git en 2005 para gestionar el desarrollo del núcleo Linux tras dejar de usar BitKeeper.",Personajes
+"Linus Torvalds sigue siendo el coordinador principal del desarrollo del núcleo Linux.",Personajes
+"Andrew Tanenbaum, autor de MINIX, tuvo un célebre debate con Linus Torvalds sobre el diseño de núcleos monolíticos.",Personajes
+"Eric Raymond escribió el ensayo La Catedral y el Bazar, que popularizó el modelo de desarrollo abierto.",Personajes
+"Bruce Perens ayudó a definir la Open Source Definition y lideró el proyecto Debian durante su etapa temprana.",Personajes
+"Jon maddog Hall fue uno de los primeros promotores del uso de Linux en empresas y gobiernos del mundo.",Personajes
+"El proyecto GNU fue anunciado en septiembre de 1983 en un grupo de noticias de la comunidad Unix.",Historia
+"El sistema Unix fue creado en 1969 en los laboratorios Bell por Ken Thompson y Dennis Ritchie.",Historia
+"MINIX fue un pequeño sistema tipo Unix creado por Tanenbaum en 1987 con fines educativos, e inspiró a Torvalds.",Historia
+"En 1991 Linus Torvalds publicó la primera versión del núcleo Linux bajo una licencia libre.",Historia
+"El núcleo Linux 0.01 se publicó en septiembre de 1991 y requería un sistema MINIX para compilarse.",Historia
+"En 1992 el núcleo Linux adoptó la licencia GPL, uniendo su destino al del proyecto GNU.",Historia
+"La versión 1.0 del núcleo Linux fue lanzada en marzo de 1994 con soporte para más de cien mil usuarios en crecimiento.",Historia
+"El pingüino Tux fue elegido como mascota oficial de Linux en 1996 por sugerencia de Linus Torvalds.",Historia
+"La combinación del núcleo Linux con las herramientas GNU dio origen al primer sistema operativo libre completo.",Historia
+"Debian, fundada en 1993 por Ian Murdock, fue una de las primeras distribuciones de GNU Linux.",Historia
+"Red Hat nació en 1993 y demostró que el software libre podía ser también un negocio exitoso.",Historia
+"En 1998 empresas como Oracle e IBM anunciaron soporte para Linux, impulsando su adopción empresarial.",Historia
+"El sistema operativo Android usa el núcleo Linux y es hoy la plataforma móvil más usada del mundo.",Historia
+"El proyecto GNU busca crear un sistema operativo libre similar a Unix pero sin usar código de Unix.",GNU
+"GNU es un acrónimo recursivo que significa GNU No es Unix, en inglés GNU's Not Unix.",GNU
+"Las cuatro libertades del software libre son usar, estudiar, modificar y compartir el programa.",GNU
+"La licencia GPL obliga a que los trabajos derivados se distribuyan bajo las mismas libertades originales.",GNU
+"La Free Software Foundation administra el proyecto GNU y defiende los derechos de los usuarios de software.",GNU
+"GCC, el compilador de GNU, fue clave para que proyectos libres pudieran construirse sin herramientas privativas.",GNU
+"GNU Emacs es un editor de texto extensible creado por Stallman y uno de los primeros programas del proyecto.",GNU
+"Las coreutils de GNU incluyen comandos esenciales como ls, cp y rm que usan los sistemas tipo Unix.",GNU
+"El shell Bash, escrito por Brian Fox para el proyecto GNU, es el intérprete de comandos más usado en Linux.",GNU
+"GNU Hurd es el núcleo original del proyecto GNU, aunque Linux se convirtió en la opción más popular.",GNU
+"Stallman insiste en llamar al sistema GNU Linux para reconocer la contribución del proyecto GNU.",GNU
+"El proyecto GNU defiende que el software privativo es un problema social por restringir a los usuarios.",GNU
+"GNU tar, GNU gzip y GNU Make son herramientas fundamentales heredadas del proyecto en todos los sistemas Linux.",GNU
+"Linux es técnicamente el núcleo del sistema operativo, no el sistema completo.",Linux
+"El núcleo Linux se distribuye bajo la licencia GPL versión 2 desde 1992.",Linux
+"El desarrollo del núcleo Linux involucra a miles de programadores y empresas de todo el mundo.",Linux
+"Las distribuciones como Ubuntu, Debian y Fedora combinan el núcleo Linux con herramientas GNU y otras aplicaciones.",Linux
+"El núcleo Linux funciona en dispositivos tan diversos como relojes inteligentes, servidores y supercomputadoras.",Linux
+"Las quinientas supercomputadoras más potentes del mundo utilizan el núcleo Linux.",Linux
+"El núcleo Linux es monolítico pero modular, lo que permite cargar controladores de dispositivos dinámicamente.",Linux
+"La Linux Foundation fue creada en 2000 para apoyar el desarrollo del núcleo y promover el software libre.",Linux
+"Linus Torvalds libera una nueva versión del núcleo Linux aproximadamente cada dos meses.",Linux
+"El código del núcleo Linux contiene decenas de millones de líneas escritas por miles de colaboradores.",Linux
+"Linux domina el mercado de servidores web y es la base de la mayoría de la infraestructura de Internet.",Linux
+"Las empresas como Google, Amazon y Meta basan gran parte de su infraestructura en sistemas GNU Linux.",Linux
+"El modelo de desarrollo de Linux demostró que miles de voluntarios podían construir un proyecto complejo sin jerarquía tradicional.",Linux

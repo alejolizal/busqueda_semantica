@@ -54,7 +54,8 @@ busqueda_semantica/
 ├── docker-compose.yml            # Servicio PostgreSQL + pgvector
 │
 ├── data/
-│   └── sample_documents.csv      # Dataset de ejemplo (52 documentos, 4 categorías)
+│   ├── sample_documents.csv      # Dataset de ejemplo (52 documentos, 4 categorías)
+│   └── procesados/               # CSV ya indexados (se mueven aquí automáticamente)
 │
 ├── src/                          # Módulos reutilizables del proyecto
 │   ├── __init__.py               # Vacío
@@ -135,7 +136,7 @@ Este script:
 4. Instala dependencias desde `requirements.txt`.
 5. Levanta PostgreSQL con Docker Compose.
 6. Ejecuta `scripts/init_db.py`.
-7. Indexa `data/sample_documents.csv`.
+7. Indexa todos los CSVs pendientes en `data/` (los ya indexados se mueven a `data/procesados/`).
 
 ### Setup manual
 
@@ -149,7 +150,7 @@ cp .env.example .env
 
 docker compose up -d
 python scripts/init_db.py
-python scripts/index_data.py --file data/sample_documents.csv
+python scripts/index_data.py          # indexa todos los CSVs pendientes en data/
 python scripts/search.py
 ```
 
@@ -159,7 +160,8 @@ python scripts/search.py
 |--------|---------|
 | Levantar base de datos | `docker compose up -d` |
 | Inicializar schema | `python scripts/init_db.py` |
-| Indexar CSV | `python scripts/index_data.py --file data/sample_documents.csv` |
+| Indexar CSVs pendientes en `data/` | `python scripts/index_data.py` |
+| Indexar un CSV específico | `python scripts/index_data.py --file data/football_teams.csv` |
 | Buscar interactivamente | `python scripts/search.py` |
 | Detener base de datos | `docker compose down` |
 | Detener y borrar datos | `docker compose down -v` |
@@ -197,6 +199,10 @@ La similitud se calcula como `1 - (embedding <=> :embedding)`, donde `<=>` es la
 ### `src/indexer.py`
 
 Lee el CSV con `pandas`, valida que exista la columna `content`, genera embeddings por batches de 100, construye metadatos a partir de las demás columnas (por ejemplo `category`) e inserta en bloque con `add_documents_bulk()`.
+
+Al finalizar la indexación con éxito, el CSV se mueve automáticamente a la subcarpeta `procesados/` junto al archivo original (ej. `data/procesados/`) mediante `move_to_processed()`, para evitar reindexar el mismo archivo por accidente. Si ya existe un archivo con el mismo nombre en `procesados/`, se agrega un timestamp al nombre para no sobrescribirlo. Si el archivo ya está dentro de `procesados/`, no se mueve.
+
+Nota: `scripts/index_data.py` sin argumentos indexa todos los CSVs pendientes en `data/` (glob no recursivo, por lo que `data/procesados/` queda excluido). Si un archivo falla, se muestra el error y se continúa con el siguiente. Con `--file` se indexa un CSV específico y con `--dir` se cambia la carpeta de búsqueda.
 
 ### `scripts/search.py`
 

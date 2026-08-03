@@ -72,9 +72,9 @@ done
 echo -e "${CYAN}🔧 Inicializando base de datos...${NC}"
 python scripts/init_db.py
 
-# Indexar datos de ejemplo
-echo -e "${CYAN}📄 Indexando documentos de ejemplo...${NC}"
-python scripts/index_data.py --file data/sample_documents.csv
+# Indexar todos los CSVs pendientes en data/ (los procesados se mueven a data/procesados/)
+echo -e "${CYAN}📄 Indexando CSVs pendientes en data/...${NC}"
+python scripts/index_data.py
 
 echo ""
 echo -e "${GREEN}========================================${NC}"

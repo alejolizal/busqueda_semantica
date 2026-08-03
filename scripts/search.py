@@ -112,7 +112,8 @@ def main():
 
     while True:
         try:
-            query = console.input("[bold green]➜ Consulta:[/bold green] ").strip()
+            console.print("[bold green]➜ Consulta:[/bold green] ", end="")
+            query = input().replace("\r", "").replace("\n", "").strip()
         except (EOFError, KeyboardInterrupt):
             console.print("\n[dim]Saliendo...[/dim]")
             break

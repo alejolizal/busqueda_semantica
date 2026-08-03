@@ -8,6 +8,35 @@ console = Console()
 
 BATCH_SIZE = 100
 
+# Nombre de la subcarpeta donde se mueven los CSV ya indexados
+PROCESSED_DIR_NAME = "procesados"
+
+
+def move_to_processed(csv_path: str) -> Path:
+    """Mueve un CSV ya indexado a la subcarpeta 'procesados' junto al archivo original.
+
+    Si ya existe un archivo con el mismo nombre, se agrega un timestamp
+    para no sobrescribir ni perder archivos.
+    """
+    src = Path(csv_path)
+
+    # Si el archivo ya está dentro de 'procesados', no se mueve de nuevo
+    if PROCESSED_DIR_NAME in src.parent.parts:
+        console.print(f"[dim]El archivo ya está en '{PROCESSED_DIR_NAME}', no se mueve.[/dim]")
+        return src
+
+    processed_dir = src.parent / PROCESSED_DIR_NAME
+    processed_dir.mkdir(parents=True, exist_ok=True)
+
+    dest = processed_dir / src.name
+    if dest.exists():
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        dest = processed_dir / f"{src.stem}_{timestamp}{src.suffix}"
+
+    shutil.move(str(src), str(dest))
+    console.print(f"[blue]📦 Archivo movido a {dest}[/blue]")
+    return dest
+
 
 def index_csv_file(csv_path: str, db: DatabaseManager, client: BaseEmbeddingsClient):
     """Carga un CSV, genera embeddings y los guarda en PostgreSQL."""
